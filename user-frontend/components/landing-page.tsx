@@ -75,7 +75,7 @@ export function LandingPage() {
             </div>
             <div className="flex justify-center">
               <img
-                src="/placeholder.svg?height=400&width=500"
+                src="/image.png"
                 alt="Healthcare Dashboard"
                 className="rounded-lg object-cover aspect-video"
                 width={500}
