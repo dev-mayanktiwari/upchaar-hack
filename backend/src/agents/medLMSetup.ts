@@ -65,6 +65,7 @@ export const createMedLMModel = (
         // Parse the response
         const result = response.data;
         const content =
+          // @ts-ignore
           result.predictions[0]?.candidates[0]?.content ||
           "Sorry, I couldn't generate a response.";
 
@@ -72,6 +73,7 @@ export const createMedLMModel = (
         return {
           text: content,
           response: {
+            // @ts-ignore
             candidates: result.predictions[0]?.candidates || [],
             raw: result,
           },
