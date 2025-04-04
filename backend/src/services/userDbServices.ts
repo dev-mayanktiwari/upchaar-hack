@@ -127,14 +127,28 @@ export default {
   },
 
   updateUserMedicalHistory: (patientId: string, medicalData: string) => {
-    return prisma.medicalHistory.update({
+    return prisma.patient.update({
       where: {
-        patientId,
+        id: patientId,
       },
       data: {
-        reportData: {
-          push: medicalData,
+        medicalHistory: {
+          update: {
+            reportData: {
+              push: medicalData,
+            },
+          },
         },
+      },
+      select: {
+        name: true,
+        email: true,
+        age: true,
+        gender: true,
+        bloodGroup: true,
+        contact: true,
+        medicalHistory: true,
+        id: true,
       },
     });
   },

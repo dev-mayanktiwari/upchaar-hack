@@ -49,6 +49,7 @@ export default {
       const { email, password } = safeParse.data;
 
       const existingUser = await userDbServices.findUniqueUser(email);
+      console.log("Existing user", existingUser);
 
       if (existingUser) {
         return httpError(
@@ -65,20 +66,36 @@ export default {
         hashedPassword
       );
 
-      const extractedData = await extractMedicalData(
-        user.medicalHistory?.reportUrl[0]!
-      );
+      let updatedUser = user;
 
-      logger.info("Extracted data", {
-        meta: {
-          extractedData,
-        },
-      });
+      // Only try to extract medical data if there's a report URL
+      if (
+        user.medicalHistory?.reportUrl &&
+        user.medicalHistory.reportUrl.length > 0
+      ) {
+        try {
+          const extractedData = await extractMedicalData(
+            user.medicalHistory.reportUrl[0]
+          );
 
-      const updatedUser = await userDbServices.updateUserMedicalHistory(
-        user.id,
-        String(extractedData)
-      );
+          logger.info("Extracted data", {
+            meta: {
+              extractedData,
+            },
+          });
+
+          updatedUser = await userDbServices.updateUserMedicalHistory(
+            user.id,
+            String(extractedData)
+          );
+        } catch (extractError) {
+          logger.error("Error extracting medical data", {
+            error: extractError,
+            userId: user.id,
+          });
+          // We continue even if extraction fails
+        }
+      }
 
       return httpResponse(
         req,
