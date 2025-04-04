@@ -134,6 +134,7 @@ export default function DrugInteractionReport() {
       }
     );
     // setReport(mockReport);
+    console.log(response.data.data.result);
     setReport(response.data.data.result);
   };
 
@@ -933,7 +934,7 @@ export default function DrugInteractionReport() {
 
                   {openSections.disclaimer && (
                     <CardContent className="p-4 bg-white">
-                      <p className="text-sm italic">
+                      <p className="text-sm italic text-red-900 font-bold">
                         {report.disclaimer ||
                           "This information is for educational purposes only and is not a substitute for professional medical advice. Always consult your healthcare provider before making any changes to your medication regimen."}
                       </p>

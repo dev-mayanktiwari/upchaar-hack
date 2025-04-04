@@ -38,13 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Upload,
-  FileText,
-  Loader2,
-} from "lucide-react";
+import { Upload, FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
 import {
   allergiesList,
@@ -56,7 +50,6 @@ import axios from "axios";
 type SignupFormValues = z.infer<typeof createUserSchema>;
 
 export default function SignupPage() {
-  const [step, setStep] = useState(1);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [presignedUrl, setPresignedUrl] = useState<string | null>(null);
@@ -108,25 +101,6 @@ export default function SignupPage() {
     }
   };
 
-  const nextStep = async () => {
-    if (step === 1) {
-      const isValid = await form.trigger(["name", "email", "password"]);
-      if (isValid) setStep(2);
-    } else if (step === 2) {
-      const isValid = await form.trigger([
-        "age",
-        "gender",
-        "bloodGroup",
-        "contact",
-      ]);
-      if (isValid) setStep(3);
-    }
-  };
-
-  const prevStep = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
@@ -161,44 +135,33 @@ export default function SignupPage() {
       return;
     }
 
+    if (!presignedUrl) {
+      toast({
+        title: "No presigned URL",
+        description: "Please select a file again to get a presigned URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsUploading(true);
 
-      // Create FormData and append the file
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-
-      // In a real app, you would call your API endpoint
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData,
-      // })
-      // const data = await response.json()
-      if (!presignedUrl) {
-        toast({
-          title: "No presigned URL",
-          description: "Please get a presigned URL first",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const response = await axios.post(presignedUrl, formData, {
+      const response = await axios.put(presignedUrl, selectedFile, {
         headers: {
           "Content-Type": selectedFile.type,
         },
       });
-      console.log(response.data);
-      const { secure_url } = response.data;  
+
+      // Construct the secure URL from the presigned URL
+      // This is a simplified example - your actual URL construction may differ
+      const secure_url = presignedUrl.split("?")[0];
+
       console.log("File uploaded successfully:", secure_url);
-      // Simulate API call with a delay
-      // await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Simulate response with a secureUrl
-      // const secureUrl = `https://example.com/uploads/${selectedFile.name}`;
-
-      // Update the form with the secureUrl
+      // Update the form with the secure URL
       form.setValue("medicalHistory.reportUrl", secure_url);
+      setFileUrl(secure_url);
 
       toast({
         title: "File uploaded successfully",
@@ -218,23 +181,20 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-3xl">
         <CardHeader>
           <CardTitle>Create an account</CardTitle>
           <CardDescription>
-            Step {step} of 3:{" "}
-            {step === 1
-              ? "Basic Information"
-              : step === 2
-              ? "Personal Details"
-              : "Medical History"}
+            Fill in all the required information to create your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {step === 1 && (
-                <>
+              <>
+                {/* Basic Information */}
+                <div className="space-y-6 mb-8">
+                  <h3 className="text-lg font-medium">Basic Information</h3>
                   <FormField
                     control={form.control}
                     name="name"
@@ -272,11 +232,7 @@ export default function SignupPage() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="********"
-                            {...field}
-                          />
+                          <Input type="password" placeholder="" {...field} />
                         </FormControl>
                         <FormDescription>
                           Password must be at least 8 characters with uppercase,
@@ -286,11 +242,11 @@ export default function SignupPage() {
                       </FormItem>
                     )}
                   />
-                </>
-              )}
+                </div>
 
-              {step === 2 && (
-                <>
+                {/* Personal Details */}
+                <div className="space-y-6 mb-8">
+                  <h3 className="text-lg font-medium">Personal Details</h3>
                   <FormField
                     control={form.control}
                     name="age"
@@ -385,11 +341,11 @@ export default function SignupPage() {
                       </FormItem>
                     )}
                   />
-                </>
-              )}
+                </div>
 
-              {step === 3 && (
-                <>
+                {/* Medical History */}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium">Medical History</h3>
                   <FormField
                     control={form.control}
                     name="medicalHistory.allergies"
@@ -583,7 +539,7 @@ export default function SignupPage() {
                           type="file"
                           accept=".pdf,.jpg,.jpeg,.png"
                           onChange={handleFileChange}
-                          onClick={getPresignedUrl}
+                          onClick={() => getPresignedUrl()}
                           className="flex-1"
                         />
                         <Button
@@ -656,26 +612,13 @@ export default function SignupPage() {
                       )}
                     />
                   </div>
-                </>
-              )}
+                </div>
+              </>
 
-              <div className="flex justify-between pt-4">
-                {step > 1 && (
-                  <Button type="button" variant="outline" onClick={prevStep}>
-                    <ChevronLeft className="mr-2 h-4 w-4" />
-                    Back
-                  </Button>
-                )}
-                {step < 3 ? (
-                  <Button type="button" onClick={nextStep} className="ml-auto">
-                    Next
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button type="submit" className="ml-auto">
-                    Create Account
-                  </Button>
-                )}
+              <div className="flex justify-center pt-6">
+                <Button type="submit" className="w-full md:w-auto">
+                  Create Account
+                </Button>
               </div>
             </form>
           </Form>
