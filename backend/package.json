@@ -1,0 +1,53 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend code for the project",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "nodemon src/index.ts",
+    "start": "tsc -b && node dist/index.js",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate"
+  },
+  "keywords": [
+    "backend"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ai-sdk/google": "^1.2.5",
+    "@google-cloud/aiplatform": "^4.1.0",
+    "@google/genai": "^0.7.0",
+    "@google/generative-ai": "^0.24.0",
+    "@prisma/client": "^6.5.0",
+    "ai": "^4.2.11",
+    "axios": "^1.8.4",
+    "bcrypt": "^5.1.1",
+    "cloudinary": "^2.6.0",
+    "colorette": "^2.0.20",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "googleapis": "^148.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^6.5.0",
+    "redis": "^4.7.0",
+    "source-map-support": "^0.5.21",
+    "transports": "link:winston/lib/winston/transports",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "winston-mongodb": "^6.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.14.0",
+    "@types/source-map-support": "^0.5.10",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Patient {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  password       String
+  age            Int
+  gender         String
+  bloodGroup     String
+  contact        String
+  appointments   Appointment[]
+  medicalHistory MedicalHistory?
+  doctors        Doctor[]        @relation("DoctorPatients")
+}
+
+model MedicalHistory {
+  id                 Int      @id @default(autoincrement())
+  patientId          String   @unique
+  patient            Patient  @relation(fields: [patientId], references: [id])
+  chronicDiseases    String[]
+  allergies          String[]
+  pastSurgeries      String[]
+  currentMedications String?
+  reportUrl          String[]
+  reportData         Json[]
+  smoking            Boolean
+  alcoholConsumption Boolean
+  createdAt          DateTime @default(now())
+}
+
+model Hospital {
+  id                        Int                 @id @default(autoincrement())
+  name                      String
+  type                      String
+  registrationNumber        String
+  phone                     String
+  email                     String              @unique
+  password                  String
+  address                   String
+  zipcode                   Int
+  rating                    Int                 @default(4)
+  departments               Department[]
+  doctors                   Doctor[]            @relation("HospitalDoctors")
+  appointments              Appointment[]
+  beds                      BedCount?           @relation("HospitalToBed")
+  medicineInventories       MedicineInventory[]
+  nearestParteneredHospital String
+}
+
+model Doctor {
+  id                Int           @id @default(autoincrement())
+  name              String
+  email             String        @unique
+  phone             String
+  password          String
+  hospitalId        Int?
+  hospital          Hospital?     @relation(fields: [hospitalId], references: [id], name: "HospitalDoctors")
+  departmentId      Int?
+  department        Department?   @relation(fields: [departmentId], references: [id])
+  dateOfBirth       DateTime
+  experience        Int
+  availability      Boolean       @default(true)
+  appointments      Appointment[]
+  patients          Patient[]     @relation("DoctorPatients")
+  headedDepartments Department[]  @relation("DepartmentHead")
+  departments       Department[]  @relation("DepartmentDoctors")
+}
+
+model Department {
+  id           Int           @id @default(autoincrement())
+  name         String
+  hospitalId   Int
+  hospital     Hospital      @relation(fields: [hospitalId], references: [id])
+  headDoctorId Int?
+  headDoctor   Doctor?       @relation("DepartmentHead", fields: [headDoctorId], references: [id])
+  appointments Appointment[]
+  doctors      Doctor[]      @relation("DepartmentDoctors")
+  Doctor       Doctor[]
+}
+
+model Appointment {
+  id           Int      @id @default(autoincrement())
+  title        String
+  time         DateTime
+  status       Status   @default(PENDING)
+  patientId    String
+  hospitalId   Int?
+  departmentId Int?
+  doctorId     Int?
+
+  // Relations
+  patient    Patient     @relation(fields: [patientId], references: [id])
+  hospital   Hospital?   @relation(fields: [hospitalId], references: [id])
+  department Department? @relation(fields: [departmentId], references: [id])
+  doctor     Doctor?     @relation(fields: [doctorId], references: [id])
+}
+
+model BedCount {
+  id                 Int      @id @default(autoincrement())
+  hospitalId         Int      @unique
+  hospital           Hospital @relation(fields: [hospitalId], references: [id], name: "HospitalToBed")
+  totalBeds          Int
+  totalAvailableBeds Int
+  icu                ICU?
+  general            General?
+  premium            Premium?
+}
+
+model ICU {
+  id           Int      @id @default(autoincrement())
+  totalBed     Int      @default(50)
+  availableBed Int      @default(20)
+  bedCountId   Int      @unique
+  bedCount     BedCount @relation(fields: [bedCountId], references: [id])
+}
+
+model General {
+  id           Int      @id @default(autoincrement())
+  totalBed     Int      @default(200)
+  availableBed Int      @default(120)
+  bedCountId   Int      @unique
+  bedCount     BedCount @relation(fields: [bedCountId], references: [id])
+}
+
+model Premium {
+  id           Int      @id @default(autoincrement())
+  totalBed     Int      @default(80)
+  availableBed Int      @default(20)
+  bedCountId   Int      @unique
+  bedCount     BedCount @relation(fields: [bedCountId], references: [id])
+}
+
+model MedicineInventory {
+  id         Int      @id @default(autoincrement())
+  name       String
+  quantity   Int
+  threshold  Int
+  expiryDate DateTime
+  hospitalId Int
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
