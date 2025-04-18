@@ -120,10 +120,14 @@ export default {
               id: true,
               name: true,
               doctors: {
+                where: {
+                  availability: true,
+                },
                 select: {
                   id: true,
                   name: true,
                   email: true,
+                  availability: true,
                 },
               },
             },

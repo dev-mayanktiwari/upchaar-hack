@@ -37,8 +37,18 @@ export default {
   },
 
   createUser: (input: CreateUserInput, hashedPassword: string) => {
-    const { name, email, age, gender, bloodGroup, contact, medicalHistory } =
-      input;
+    const {
+      name,
+      email,
+      age,
+      gender,
+      bloodGroup,
+      contact,
+      medicalHistory,
+      weight,
+      height,
+      location,
+    } = input;
 
     return prisma.patient.create({
       data: {
@@ -46,6 +56,9 @@ export default {
         email,
         password: hashedPassword,
         age,
+        weight,
+        height,
+        location,
         gender,
         bloodGroup,
         contact,
@@ -84,12 +97,28 @@ export default {
     return prisma.appointment.create({
       data: {
         title,
-        time: date,
         status: "PENDING",
-        patientId,
-        hospitalId: parseInt(hospitalId, 10),
-        departmentId: parseInt(departmentId, 10),
-        doctorId: parseInt(doctorId, 10),
+        time: date,
+        patient: {
+          connect: {
+            id: patientId,
+          },
+        },
+        hospital: {
+          connect: {
+            id: hospitalId,
+          },
+        },
+        department: {
+          connect: {
+            id: departmentId,
+          },
+        },
+        doctor: {
+          connect: {
+            id: doctorId,
+          },
+        },
       },
     });
   },
@@ -127,6 +156,7 @@ export default {
   },
 
   updateUserMedicalHistory: (patientId: string, medicalData: string) => {
+    console.log("Inside db controller for medical history", medicalData);
     return prisma.patient.update({
       where: {
         id: patientId,
@@ -162,6 +192,15 @@ export default {
         reportUrl: {
           push: reportUrl,
         },
+      },
+    });
+  },
+
+  isTimeSlotTaken: (doctorId: string, date: string) => {
+    return prisma.appointment.findFirst({
+      where: {
+        doctorId,
+        time: date,
       },
     });
   },

@@ -1,78 +1,76 @@
-import { generateText } from "ai";
-import model from "../utils/googleAI";
+import { genAI } from "../utils/googleAI";
 import { ocrPrompt } from "../prompts";
 import logger from "../utils/logger";
 
-type MedicalOCRResponse = Record<string, unknown>;
-
 export const extractMedicalData = async (fileUrl: string) => {
   try {
-    // Validate file URL
     if (!fileUrl) {
       throw new Error("File URL is required");
     }
 
-    // Validate URL format
-    try {
-      new URL(fileUrl);
-    } catch (error) {
-      throw new Error("Invalid file URL format");
-    }
+    // Fetch and convert PDF to base64
+    const pdfBuffer = await fetch(fileUrl).then((res) => res.arrayBuffer());
 
-    // Generate text from the file using AI
-    const result = await generateText({
-      model: model,
-      messages: [
-        {
-          role: "system",
-          content: ocrPrompt,
-        },
+    const result = await genAI.generateContent({
+      contents: [
         {
           role: "user",
-          content: fileUrl,
+          parts: [
+            { text: ocrPrompt },
+            {
+              inlineData: {
+                mimeType: "application/pdf",
+                data: Buffer.from(pdfBuffer).toString("base64"),
+              },
+            },
+          ],
         },
       ],
     });
 
-    // Clean and parse the response
+    const response = await result.response;
+    let text = response.text();
+
+    if (!text) throw new Error("No text extracted from the PDF");
+
+    // Strip Markdown formatting like ```json
+    if (text.startsWith("```json")) text = text.slice(7);
+    if (text.endsWith("```")) text = text.slice(0, -3);
+
+    text = text.trim();
+
+    let parsedJson;
     try {
-      // Remove markdown code block markers if present
-      let jsonString = result.text;
-      if (jsonString.startsWith('```json')) {
-        jsonString = jsonString.substring(7);
-      }
-      if (jsonString.endsWith('```')) {
-        jsonString = jsonString.substring(0, jsonString.length - 3);
-      }
-      
-      // Trim any whitespace
-      jsonString = jsonString.trim();
-      
-      // Parse the cleaned JSON string
-      const parsedResponse = JSON.parse(jsonString) as MedicalOCRResponse;
-      
-      logger.info("Successfully parsed medical data", {
+      parsedJson = JSON.parse(text);
+      logger.info("Parsed JSON successfully", {
         meta: {
+          parsedJson,
           fileUrl,
-          parsedData: parsedResponse
-        }
+        },
       });
-      
-      return parsedResponse;
     } catch (parseError) {
-      logger.error("Failed to parse OCR response", {
+      logger.error("Failed to parse AI response as JSON", {
         meta: {
           error: parseError,
-          rawResponse: result.text,
-          fileUrl
-        }
+          rawResponse: text,
+          fileUrl,
+        },
       });
-      throw new Error("Failed to parse OCR response");
+      throw new Error("Failed to parse JSON from AI response");
     }
+
+    logger.info("Successfully parsed medical data", {
+      meta: {
+        fileUrl,
+        parsedData: parsedJson,
+      },
+    });
+
+    return JSON.stringify(parsedJson);
   } catch (error) {
     logger.error("Error in extractMedicalData", {
       meta: {
-        error: error,
+        error,
         fileUrl,
       },
     });
