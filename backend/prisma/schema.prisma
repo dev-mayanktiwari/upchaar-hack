@@ -83,7 +83,7 @@ model Doctor {
   doctorLeaves      DoctorLeave[]
   patients          Patient[]        @relation("DoctorPatients")
   headedDepartments Department[]     @relation("DepartmentHead")
-  departments       Department[]     @relation("DepartmentDoctors")
+  // departments       Department[]     @relation("DepartmentDoctors")
 }
 
 model DoctorSchedule {
@@ -93,6 +93,8 @@ model DoctorSchedule {
   day       Int
   startTime DateTime
   endTime   DateTime
+
+  @@unique([doctorId, day])
 }
 
 model DoctorLeave {
@@ -103,6 +105,7 @@ model DoctorLeave {
   reason    String?
 }
 
+
 model Department {
   id           Int           @id @default(autoincrement())
   name         String
@@ -111,8 +114,7 @@ model Department {
   headDoctorId String?
   headDoctor   Doctor?       @relation("DepartmentHead", fields: [headDoctorId], references: [id])
   appointments Appointment[]
-  doctors      Doctor[]      @relation("DepartmentDoctors")
-  Doctor       Doctor[]
+  doctors      Doctor[]      // One department has many doctors
 }
 
 model Appointment {
