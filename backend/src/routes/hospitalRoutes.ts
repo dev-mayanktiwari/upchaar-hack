@@ -14,5 +14,6 @@ hospitalRouter.put(
   hospitalController.addDoctorSchedule
 );
 hospitalRouter.get("/get-all-hospitals", hospitalController.getAllHospitals);
+hospitalRouter.get("/:id", hospitalController.getHospitalById);
 
 export default hospitalRouter;
