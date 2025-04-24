@@ -105,7 +105,6 @@ model DoctorLeave {
   reason    String?
 }
 
-
 model Department {
   id           Int           @id @default(autoincrement())
   name         String
@@ -114,7 +113,7 @@ model Department {
   headDoctorId String?
   headDoctor   Doctor?       @relation("DepartmentHead", fields: [headDoctorId], references: [id])
   appointments Appointment[]
-  doctors      Doctor[]      // One department has many doctors
+  doctors      Doctor[] // One department has many doctors
 }
 
 model Appointment {

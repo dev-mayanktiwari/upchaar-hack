@@ -33,6 +33,14 @@ export default {
     });
   },
 
+  getDoctorByEmail: (email: string) => {
+    return prisma.doctor.findUnique({
+      where: {
+        email,
+      },
+    });
+  },
+
   getDoctorSchedule: (doctorId: string, startDate: Date, endDate: Date) => {
     return prisma.doctorSchedule.findMany({
       where: {
@@ -69,14 +77,20 @@ export default {
   },
 
   getLeaveDates: (doctorId: string, startDate: Date, endDate: Date) => {
+    const start = new Date(startDate);
+    start.setUTCHours(0, 0, 0, 0);
+  
+    const end = new Date(endDate);
+    end.setUTCHours(23, 59, 59, 999);
+  
     return prisma.doctorLeave.findMany({
       where: {
         doctorId,
         leaveDate: {
-          gte: startDate,
-          lte: endDate,
+          gte: start,
+          lte: end,
         },
       },
     });
-  },
+  }
 };

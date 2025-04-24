@@ -5,6 +5,8 @@ import httpResponse from "../utils/httpResponse";
 import AuthenticatedRequest from "../types/expressRequest";
 import doctorDbServices from "../services/doctorDbServices";
 import quicker from "../utils/quicker";
+import { loginUserSchema } from "../types/userInputTypes";
+import bcrypt from "bcrypt";
 
 export default {
   self: (req: Request, res: Response, next: NextFunction) => {
@@ -12,6 +14,61 @@ export default {
       httpResponse(req, res, EResponseStatusCode.OK, "Hello World", {
         name: "Mayank Tiwari",
       });
+    } catch (error) {
+      httpError(next, error, req);
+    }
+  },
+
+  login: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = req.body;
+      const safeParse = loginUserSchema.safeParse(body);
+      if (!safeParse.success) {
+        return httpError(
+          next,
+          new Error("Invalid Request"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+      const { email, password } = safeParse.data;
+      const doctor = await doctorDbServices.getDoctorByEmail(email);
+
+      if (!doctor) {
+        return httpError(
+          next,
+          new Error("Doctor not exists"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+      const isPasswordValid = await bcrypt.compare(password, doctor.password);
+
+      if (!isPasswordValid) {
+        return httpResponse(
+          req,
+          res,
+          EErrorStatusCode.BAD_REQUEST,
+          "Invalid password"
+        );
+      }
+
+      const accessToken = quicker.generateJWTtoken(doctor.id);
+
+      return httpResponse(
+        req,
+        res,
+        EResponseStatusCode.OK,
+        "Login successful",
+        {
+          accessToken,
+          user: {
+            id: doctor.id,
+            name: doctor.name,
+            email: doctor.email,
+          },
+        }
+      );
     } catch (error) {
       httpError(next, error, req);
     }
@@ -147,14 +204,14 @@ export default {
         endDate
       );
 
-      // console.log("Leave Dates:", leaveDates);
+      console.log("Leave Dates:", leaveDates);
 
       const cleanStart = quicker.cleanDateToYYYYMMDD(String(startDate));
       const cleanEnd = quicker.cleanDateToYYYYMMDD(String(endDate));
 
       // console.log("Clean Start Date:", cleanStart);
       // console.log("Clean End Date:", cleanEnd);
-      
+
       const weeklySchedule = quicker.getAvailableSlots(
         cleanStart,
         cleanEnd,

@@ -54,7 +54,7 @@ export default {
   },
 
   parsedDate: (date: string) => {
-    const parsedDate = dayjs(date, "DD-MM-YY").startOf("day").toDate();
+    const parsedDate = dayjs(date).startOf("day").toDate();
     return parsedDate;
   },
 
@@ -95,7 +95,7 @@ export default {
       const isOnLeave = leaveDates.some((ld) =>
         dayjs(ld.leaveDate).isSame(current, "day")
       );
-      // console.log("Is on leave:", isOnLeave);
+      console.log("Is on leave:", isOnLeave);
       if (isOnLeave) {
         result.push({ date: dateStr, isAvailable: false, slots: [] });
         current = current.add(1, "day");
