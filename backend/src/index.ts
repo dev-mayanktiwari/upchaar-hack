@@ -25,7 +25,7 @@ app.use(
 );
 
 // Routes
-app.use("/api/v1/health", healthRouter); // ✅ Fixed missing "/"
+app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/ai", aiRouter);
 app.use("/api/v1/doctor", doctorRouter);
@@ -43,7 +43,7 @@ app.use(globalErrorHandler);
 
 async function startServer() {
   try {
-    await connectRedis(); // ✅ Ensure Redis is connected before starting
+    // await connectRedis(); // ✅ Ensure Redis is connected before starting
 
     app.listen(PORT, () => {
       logger.info("🚀 Server started successfully", {
@@ -70,3 +70,20 @@ process.on("SIGINT", async () => {
   await disconnectRedis(); // ✅ Clean up Redis before exit
   process.exit(0);
 });
+
+// // INFO - 2025-04-11 00:25:31 - Controller Response
+// // META {
+// //   success: true,
+// //   statusCode: 200,
+// //   request: { ip: '::1', method: 'GET', url: '/api/v1/user/drug-interaction' },
+// //   message: 'Drug interaction data fetched successfully',
+// //   data: {
+// //     result: {
+// //       error: {
+// //         message: 'Invalid or ambiguous medication input. Please provide clearly structured medication data.',
+// //         reason: "Medication data was provided in raw text format within 'reportData' instead of the required structured format. Each medication entry must explicitly include 'name', 'class', 'indications', and 'mechanism_of_action'.",
+// //         suggestion: "Please reformat the input to provide medication details in a structured array, where each object represents a medication with the fields: 'name', 'class', 'indications', and 'mechanism_of_action'."
+// //       }
+// //     }
+// //   }
+

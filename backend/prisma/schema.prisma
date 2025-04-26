@@ -21,6 +21,9 @@ model Patient {
   password       String
   age            Int
   gender         String
+  weight         Float
+  height         Float
+  location       String
   bloodGroup     String
   contact        String
   appointments   Appointment[]
@@ -37,14 +40,14 @@ model MedicalHistory {
   pastSurgeries      String[]
   currentMedications String?
   reportUrl          String[]
-  reportData         Json[]
+  reportData         String[]
   smoking            Boolean
   alcoholConsumption Boolean
   createdAt          DateTime @default(now())
 }
 
 model Hospital {
-  id                        Int                 @id @default(autoincrement())
+  id                        String              @id @default(cuid())
   name                      String
   type                      String
   registrationNumber        String
@@ -63,34 +66,54 @@ model Hospital {
 }
 
 model Doctor {
-  id                Int           @id @default(autoincrement())
+  id                String           @id @default(cuid())
   name              String
-  email             String        @unique
+  email             String           @unique
   phone             String
   password          String
-  hospitalId        Int?
-  hospital          Hospital?     @relation(fields: [hospitalId], references: [id], name: "HospitalDoctors")
+  hospitalId        String?
+  hospital          Hospital?        @relation(fields: [hospitalId], references: [id], name: "HospitalDoctors")
   departmentId      Int?
-  department        Department?   @relation(fields: [departmentId], references: [id])
+  department        Department?      @relation(fields: [departmentId], references: [id])
   dateOfBirth       DateTime
   experience        Int
-  availability      Boolean       @default(true)
+  availability      Boolean          @default(true)
   appointments      Appointment[]
-  patients          Patient[]     @relation("DoctorPatients")
-  headedDepartments Department[]  @relation("DepartmentHead")
-  departments       Department[]  @relation("DepartmentDoctors")
+  doctorSchedule    DoctorSchedule[]
+  doctorLeaves      DoctorLeave[]
+  patients          Patient[]        @relation("DoctorPatients")
+  headedDepartments Department[]     @relation("DepartmentHead")
+  // departments       Department[]     @relation("DepartmentDoctors")
+}
+
+model DoctorSchedule {
+  id        Int      @id @default(autoincrement())
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  day       Int
+  startTime DateTime
+  endTime   DateTime
+
+  @@unique([doctorId, day])
+}
+
+model DoctorLeave {
+  id        Int      @id @default(autoincrement())
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  leaveDate DateTime
+  reason    String?
 }
 
 model Department {
   id           Int           @id @default(autoincrement())
   name         String
-  hospitalId   Int
+  hospitalId   String
   hospital     Hospital      @relation(fields: [hospitalId], references: [id])
-  headDoctorId Int?
+  headDoctorId String?
   headDoctor   Doctor?       @relation("DepartmentHead", fields: [headDoctorId], references: [id])
   appointments Appointment[]
-  doctors      Doctor[]      @relation("DepartmentDoctors")
-  Doctor       Doctor[]
+  doctors      Doctor[] // One department has many doctors
 }
 
 model Appointment {
@@ -99,9 +122,9 @@ model Appointment {
   time         DateTime
   status       Status   @default(PENDING)
   patientId    String
-  hospitalId   Int?
+  hospitalId   String?
   departmentId Int?
-  doctorId     Int?
+  doctorId     String?
 
   // Relations
   patient    Patient     @relation(fields: [patientId], references: [id])
@@ -112,7 +135,7 @@ model Appointment {
 
 model BedCount {
   id                 Int      @id @default(autoincrement())
-  hospitalId         Int      @unique
+  hospitalId         String   @unique
   hospital           Hospital @relation(fields: [hospitalId], references: [id], name: "HospitalToBed")
   totalBeds          Int
   totalAvailableBeds Int
@@ -151,7 +174,7 @@ model MedicineInventory {
   quantity   Int
   threshold  Int
   expiryDate DateTime
-  hospitalId Int
+  hospitalId String
   hospital   Hospital @relation(fields: [hospitalId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

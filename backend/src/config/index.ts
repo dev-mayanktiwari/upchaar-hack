@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
+dotenv.config({ path: "../../.env" });
+// console.log("Environment Variables Loaded", process.env.GEMINI_API_KEY);
 
 type ConfigKeys =
   | "PORT"
@@ -19,7 +21,10 @@ type ConfigKeys =
   | "CORS_ORIGIN"
   | "CLOUDINARY_CLOUD_NAME"
   | "CLOUDINARY_API_KEY"
+  | "PROJECT_ID"
+  | "PROJECT_REGION"
   | "CLOUDINARY_API_SECRET";
+
 //   | "ADMIN_PASSWORD";
 
 const _config: Record<ConfigKeys, string | undefined> = {
@@ -42,6 +47,8 @@ const _config: Record<ConfigKeys, string | undefined> = {
   //   ADMIN_USERNAME: process.env.ADMIN_USERNAME,
   //   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   CORS_ORIGIN: process.env.CORS_ORIGIN,
+  PROJECT_ID: process.env.PROJECT_ID,
+  PROJECT_REGION: process.env.PROJECT_REGION,
 };
 
 export const AppConfig = {

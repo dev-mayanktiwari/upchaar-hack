@@ -19,7 +19,7 @@ export type THTTPError = {
     url: string;
   };
   message: string;
-  data: null;
+  data: unknown;
   trace?: object | null;
 };
 

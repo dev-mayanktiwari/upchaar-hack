@@ -1,37 +1,58 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar, ClipboardList, MessageSquare, Pill, AlertTriangle, ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Calendar,
+  ClipboardList,
+  MessageSquare,
+  Pill,
+  AlertTriangle,
+  ArrowRight,
+  Hospital,
+} from "lucide-react";
+import Link from "next/link";
+import { appointmentService } from "@/lib/api-client";
+import { format } from "date-fns";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 interface User {
-  name: string
+  name: string;
 }
 
-interface Appointment {
-  id: string
-  date: string
-  timeSlot: string
-  doctorName: string
-  hospitalName: string
-  status: string
-}
+// interface Appointment {
+//   id: string;
+//   date: string;
+//   timeSlot: string;
+//   doctorName: string;
+//   hospitalName: string;
+//   status: string;
+// }
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null)
-  const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Get user data from localStorage
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData))
+      setUser(JSON.parse(userData));
     }
 
     // Fetch upcoming appointments
@@ -42,45 +63,62 @@ export default function DashboardPage() {
         // setUpcomingAppointments(response.data.appointments)
 
         // Mock data for demonstration
-        setUpcomingAppointments([
-          {
-            id: "1",
-            date: "2023-08-25",
-            timeSlot: "10:00 AM",
-            doctorName: "Dr. Sarah Johnson",
-            hospitalName: "City General Hospital",
-            status: "Confirmed",
-          },
-          {
-            id: "2",
-            date: "2023-09-02",
-            timeSlot: "2:30 PM",
-            doctorName: "Dr. Michael Chen",
-            hospitalName: "Riverside Medical Center",
-            status: "Pending",
-          },
-        ])
+        const response = await appointmentService.getAllAppointments();
+        // @ts-ignore
+        if (response.success) {
+          // @ts-ignore
+          setUpcomingAppointments(response.data);
+          // console.log("response", response.data);
+        }
+        // setUpcomingAppointments([
+        //   {
+        //     id: "1",
+        //     date: "2023-08-25",
+        //     timeSlot: "10:00 AM",
+        //     doctorName: "Dr. Sarah Johnson",
+        //     hospitalName: "City General Hospital",
+        //     status: "Confirmed",
+        //   },
+        //   {
+        //     id: "2",
+        //     date: "2023-09-02",
+        //     timeSlot: "2:30 PM",
+        //     doctorName: "Dr. Michael Chen",
+        //     hospitalName: "Riverside Medical Center",
+        //     status: "Pending",
+        //   },
+        // ])
       } catch (error) {
-        console.error("Error fetching appointments:", error)
+        console.error("Error fetching appointments:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchAppointments()
-  }, [])
+    fetchAppointments();
+  }, []);
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
         {/* Welcome Section */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name || "User"}</h1>
-          <p className="text-muted-foreground">Here's an overview of your health dashboard</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, {user?.name || "User"}
+          </h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your health dashboard
+          </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <QuickActionCard
+            title="View Partnered Hospitals"
+            description="View available hospitals for appointments"
+            icon={<Hospital className="h-6 w-6" />}
+            href="/hospitals"
+          />
           <QuickActionCard
             title="Book Appointment"
             description="Schedule a new appointment with a doctor"
@@ -105,7 +143,7 @@ export default function DashboardPage() {
             icon={<MessageSquare className="h-6 w-6" />}
             href="/dashboard/medai-bot"
           />
-        </div>
+        </div> */}
 
         {/* Upcoming Appointments */}
         <Card>
@@ -136,20 +174,35 @@ export default function DashboardPage() {
                     className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                   >
                     <div className="space-y-1">
-                      <div className="font-medium">{appointment.hospitalName}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {appointment.doctorName} • {new Date(appointment.date).toLocaleDateString()} •{" "}
-                        {appointment.timeSlot}
+                      <div className="font-medium">
+                        {appointment.hospital?.name || "Hospital not specified"}
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        {appointment.doctor?.name || "Doctor not specified"} •{" "}
+                        {appointment.department?.name &&
+                          `${appointment.department.name} • `}
+                        {format(new Date(appointment.time), "MMM dd, yyyy")} •{" "}
+                        {dayjs(appointment.time)
+                          .tz("Asia/Kolkata")
+                          .format("h:mm A")}
+                      </div>
+                      {appointment.title && (
+                        <div className="text-sm italic">
+                          {appointment.title}
+                        </div>
+                      )}
                     </div>
                     <div
                       className={`text-sm font-medium ${
-                        appointment.status === "Confirmed"
+                        appointment.status === "CONFIRMED"
                           ? "text-green-600 dark:text-green-500"
-                          : "text-amber-600 dark:text-amber-500"
+                          : appointment.status === "PENDING"
+                          ? "text-amber-600 dark:text-amber-500"
+                          : "text-gray-600 dark:text-gray-400"
                       }`}
                     >
-                      {appointment.status}
+                      {appointment.status.charAt(0) +
+                        appointment.status.slice(1).toLowerCase()}
                     </div>
                   </div>
                 ))}
@@ -157,8 +210,12 @@ export default function DashboardPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">No upcoming appointments</h3>
-                <p className="text-sm text-muted-foreground mb-4">You don't have any appointments scheduled yet.</p>
+                <h3 className="text-lg font-medium">
+                  No upcoming appointments
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  You don't have any appointments scheduled yet.
+                </p>
                 <Link href="/dashboard/book-appointment">
                   <Button>Book an Appointment</Button>
                 </Link>
@@ -193,7 +250,7 @@ export default function DashboardPage() {
         </Card>
       </div>
     </DashboardLayout>
-  )
+  );
 }
 
 function QuickActionCard({
@@ -202,10 +259,10 @@ function QuickActionCard({
   icon,
   href,
 }: {
-  title: string
-  description: string
-  icon: React.ReactNode
-  href: string
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  href: string;
 }) {
   return (
     <Link href={href}>
@@ -221,6 +278,5 @@ function QuickActionCard({
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
-

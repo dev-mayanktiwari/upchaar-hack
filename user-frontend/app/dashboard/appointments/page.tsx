@@ -32,6 +32,13 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import axios from "axios";
+import { appointmentService } from "@/lib/api-client";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface Appointment {
   id: number;
@@ -85,41 +92,47 @@ export default function AppointmentsPage() {
       // Use relative URL or environment variable for API endpoint
       const baseUrl =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:6969";
-      const response = await axios.get(
-        `http://localhost:6969/api/v1/user/get-appointments`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setAppointments(response.data.data);
-        setFilteredAppointments(response.data.data);
+      const response = await appointmentService.getAllAppointments();
+      // console.log("Response data:", response.data);
+      // @ts-ignore
+      if (response.success) {
+        // @ts-ignore
+        setAppointments(response.data);
+        // @ts-ignore
+        setFilteredAppointments(response.data);
       } else {
-        console.error("Failed to fetch appointments:", response.data.message);
-        setError(response.data.message || "Failed to fetch appointments");
+        // @ts-ignore
+        console.error("Failed to fetch appointments:", response.message);
+        // @ts-ignore
+        setError(response.message || "Failed to fetch appointments");
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
 
       // Enhanced error logging and user feedback
+      // @ts-ignore
       if (error.response) {
+        // @ts-ignore
         console.error("Response data:", error.response.data);
+        // @ts-ignore
         console.error("Response status:", error.response.status);
         setError(
+          // @ts-ignore
           `Error ${error.response.status}: ${
+            // @ts-ignore
             error.response.data?.message || "Failed to fetch appointments"
           }`
         );
+        // @ts-ignore
       } else if (error.request) {
         console.error("Request sent but no response received");
         setError(
           "Network error: No response received from server. Please check your connection."
         );
       } else {
+        // @ts-ignore
         console.error("Error setting up request:", error.message);
+        // @ts-ignore
         setError("Error making request: " + error.message);
       }
     } finally {
@@ -385,7 +398,9 @@ export default function AppointmentsPage() {
                               </div>
                               <div className="text-sm text-muted-foreground flex items-center">
                                 <Clock className="mr-1 h-3 w-3" />
-                                {format(new Date(appointment.time), "h:mm a")}
+                                {dayjs(appointment.time)
+                                  .tz("Asia/Kolkata")
+                                  .format("h:mm A")}
                               </div>
                             </TableCell>
                             <TableCell>{appointment.doctor.name}</TableCell>

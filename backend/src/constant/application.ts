@@ -1,13 +1,13 @@
 export const enum EApplicationEnvirontment {
   PRODUCTION = "production",
-  DEVELOPMENT = "development"
+  DEVELOPMENT = "development",
 }
 
 export const enum EResponseStatusCode {
   OK = 200, // Request succeeded
   CREATED = 201, // Resource created successfully
   ACCEPTED = 202, // Request accepted, processing
-  NO_CONTENT = 204 // Request succeeded, no content to return
+  NO_CONTENT = 204, // Request succeeded, no content to return
 }
 
 export const enum EErrorStatusCode {
@@ -26,6 +26,5 @@ export const enum EErrorStatusCode {
   NOT_IMPLEMENTED = 501, // Not implemented
   BAD_GATEWAY = 502, // Invalid response from upstream server
   SERVICE_UNAVAILABLE = 503, // Service temporarily unavailable
-  GATEWAY_TIMEOUT = 504 // Upstream server timed out
+  GATEWAY_TIMEOUT = 504, // Upstream server timed out
 }
-

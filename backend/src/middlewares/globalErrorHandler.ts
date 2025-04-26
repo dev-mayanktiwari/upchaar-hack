@@ -8,5 +8,6 @@ export default (
   res: Response,
   __: NextFunction
 ) => {
+  console.log("Global Error Handler", err);
   res.status(err.statusCode).json(err);
 };

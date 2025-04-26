@@ -120,6 +120,29 @@ export default function DrugInteractionReport() {
     }));
   };
 
+  function extractJsonFromResponse(response) {
+    try {
+      // Find the JSON content between triple backticks
+      // const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/);
+
+      if (!jsonMatch || !jsonMatch[1]) {
+        throw new Error("No JSON content found between ```json tags");
+      }
+
+      // Get the JSON string and parse it
+      const jsonString = jsonMatch[1];
+
+      // Replace escaped newlines with actual newlines
+      const cleanedJsonString = jsonString.replace(/\\n/g, "\n");
+
+      // Parse the JSON
+      return JSON.parse(cleanedJsonString);
+    } catch (error) {
+      console.error("Error extracting or parsing JSON:", error);
+      return null;
+    }
+  }
+
   //  Function to generate mock data for demonstration
   const generateMockReport = async () => {
     setLoading(true);
@@ -133,9 +156,11 @@ export default function DrugInteractionReport() {
         },
       }
     );
-    // setReport(mockReport);
-    console.log(response.data.data.result);
-    setReport(response.data.data.result);
+
+    // console.log(response.data);
+    const report = response.data.data.result;
+    // const properJson = extractJsonFromResponse(response.data.data.result);
+    setReport(report);
   };
 
   const getRiskBadge = (riskLevel: string | undefined) => {

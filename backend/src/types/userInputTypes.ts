@@ -12,6 +12,9 @@ export const createUserSchema = z.object({
     ),
   age: z.number().min(0, "Age must be a positive number"),
   gender: z.enum(["Male", "Female", "Other"]),
+  weight: z.number().min(0, "Weight must be a positive number"),
+  height: z.number().min(0, "Height must be a positive number"),
+  location: z.string().min(5, "Location must be at least 5 characters long"),
   bloodGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
   contact: z.string().regex(/^\d{10}$/, "Contact number must be 10 digits"),
   medicalHistory: z.object({
@@ -33,7 +36,7 @@ export const loginUserSchema = z.object({
 
 export const appointmentSchema = z.object({
   hospitalId: z.string(),
-  departmentId: z.string(),
+  departmentId: z.number(),
   doctorId: z.string(),
   title: z.string(),
   time: z.string(),

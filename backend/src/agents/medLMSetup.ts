@@ -1,15 +1,19 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAuth } from "google-auth-library";
-import axios from "axios";
+import { AppConfig } from "../config";
+import path from "path";
 
 // Custom model implementation for the Google MedLM API
 export const createMedLMModel = (
-  projectId: string = "upchaar-455216",
-  location: string = "us-central1",
+  projectId: string = String(AppConfig.get("PROJECT_ID")),
+  location: string = String(AppConfig.get("PROJECT_REGION")),
   serviceAccountKeyPath: string = process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-    "../../upchaar-455216-fcd344c9bbf9.json"
+    path.join(__dirname, "../../upchaar-455216-fcd344c9bbf9.json")
 ) => {
   // URL for the MedLM API
+  // PRIVATE ENDPOINT
+  // const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/medlm-large:predict`;
+
+  // PUBLIC ENDPOINT
   const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/medlm-large:predict`;
 
   // Set up auth client
