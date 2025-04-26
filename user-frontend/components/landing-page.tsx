@@ -29,7 +29,7 @@ export function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b">
+      <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-2 font-bold text-xl text-primary">
           <Heart className="h-6 w-6 text-rose-500" />
           <span>Upchaar</span>
@@ -60,7 +60,7 @@ export function LandingPage() {
                 medical advice.
               </p>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link href="/auth/signup">
+                <Link href="/signup">
                   <Button size="lg" className="gap-1.5">
                     Get Started
                     <ArrowRight className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function LandingPage() {
             </div>
             <div className="flex justify-center">
               <img
-                src="/images.png"
+                src="/placeholder.svg?height=400&width=500"
                 alt="Healthcare Dashboard"
                 className="rounded-lg object-cover aspect-video"
                 width={500}
@@ -149,13 +149,13 @@ export function LandingPage() {
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Link href="/auth/signup">
+              <Link href="/signup">
                 <Button size="lg" className="gap-1.5">
                   Sign Up Now
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button size="lg" variant="outline">
                   Log In
                 </Button>
@@ -166,7 +166,7 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full py-6 border-t">
+      <footer className="w-full py-6 border-t mt-auto">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center gap-4 md:flex-row md:justify-between">
             <div className="flex items-center gap-2 font-bold text-xl">
@@ -174,7 +174,7 @@ export function LandingPage() {
               <span>Upchaar</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              © 2025 Upchaar. All rights reserved.
+              © {new Date().getFullYear()} Upchaar. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Link

@@ -68,38 +68,41 @@ export const authService = {
   signup: (userData: any) =>
     apiRequest({
       method: "POST",
-      url: "/register",
+      url: "/user/register",
       data: userData,
     }),
   login: (credentials: { email: string; password: string }) =>
     apiRequest({
       method: "POST",
-      url: "/login",
+      url: "/user/login",
       data: credentials,
     }),
   getPresignedUrl: () =>
     apiRequest({
       method: "GET",
-      url: "/get-presigned-url",
+      url: "/user/get-presigned-url",
     }),
 };
 
 export const appointmentService = {
-  getAvailableSlots: (date: string) =>
-    apiRequest({
-      method: "GET",
-      url: `/appointments/available-slots?date=${date}`,
-    }),
   bookAppointment: (appointmentData: any) =>
     apiRequest({
       method: "POST",
-      url: "/appointments/book",
+      url: "/user/book-appointment",
       data: appointmentData,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
     }),
   getAllAppointments: () =>
     apiRequest({
       method: "GET",
-      url: "/appointments",
+      url: "/user/get-appointments",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
     }),
 };
 
@@ -135,4 +138,24 @@ export const medicationService = {
     }),
 };
 
+export const hospitalService = {
+  getAllHospitals: () =>
+    apiRequest({
+      method: "GET",
+      url: "/hospital/get-all-hospitals",
+    }),
+  getHospitalById: (hospitalId: string) =>
+    apiRequest({
+      method: "GET",
+      url: `/hospital/${hospitalId}`,
+    }),
+};
+
+export const doctorService = {
+  getAvailableSlots: (doctorId: string) =>
+    apiRequest({
+      method: "GET",
+      url: `/doctor/get-available-slots/${doctorId}`,
+    }),
+};
 export default apiClient;

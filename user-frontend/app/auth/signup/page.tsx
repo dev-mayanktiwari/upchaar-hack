@@ -66,6 +66,9 @@ export default function SignupPage() {
       password: "",
       age: 0,
       gender: "Male",
+      weight: 0,
+      height: 0,
+      location: "",
       bloodGroup: "O+",
       contact: "",
       medicalHistory: {
@@ -146,16 +149,18 @@ export default function SignupPage() {
 
     try {
       setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
 
-      const response = await axios.put(presignedUrl, selectedFile, {
+      const response = await axios.post(presignedUrl, formData, {
         headers: {
-          "Content-Type": selectedFile.type,
+          "Content-Type": "multipart/form-data",
         },
       });
-
+      // Check if the upload was successful
       // Construct the secure URL from the presigned URL
       // This is a simplified example - your actual URL construction may differ
-      const secure_url = presignedUrl.split("?")[0];
+      const { secure_url } = response.data;
 
       console.log("File uploaded successfully:", secure_url);
 
@@ -203,6 +208,19 @@ export default function SignupPage() {
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
                           <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Delhi" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -290,6 +308,50 @@ export default function SignupPage() {
                             <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Weight</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="50"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(
+                                Number.parseFloat(e.target.value) || 0
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Height (in cms.)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="125"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(
+                                Number.parseFloat(e.target.value) || 0
+                              )
+                            }
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

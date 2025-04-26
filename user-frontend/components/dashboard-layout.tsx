@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
   ClipboardList,
@@ -19,63 +19,79 @@ import {
   Pill,
   User,
   AlertTriangle,
-} from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
-import { useMobile } from "@/hooks/use-mobile"
+  Hospital,
+} from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null)
-  const router = useRouter()
-  const pathname = usePathname()
-  const { toast } = useToast()
-  const isMobile = useMobile()
+  const [user, setUser] = useState<{ name: string; email: string } | null>(
+    null
+  );
+  const router = useRouter();
+  const pathname = usePathname();
+  const { toast } = useToast();
+  const isMobile = useMobile();
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem("accessToken")
-    const userData = localStorage.getItem("user")
+    const token = localStorage.getItem("accessToken");
+    const userData = localStorage.getItem("user");
 
     if (!token) {
-      router.push("/auth/login")
-      return
+      router.push("/auth/login");
+      return;
     }
 
     if (userData) {
-      setUser(JSON.parse(userData))
+      setUser(JSON.parse(userData));
     }
-  }, [router])
+  }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken")
-    localStorage.removeItem("user")
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
 
     toast({
       title: "Logged out successfully",
       description: "You have been logged out of your account",
-    })
+    });
 
-    router.push("/auth/login")
-  }
+    router.push("/auth/login");
+  };
 
   const navigationItems = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Book Appointment", href: "/dashboard/book-appointment", icon: Calendar },
-    { name: "My Appointments", href: "/dashboard/appointments", icon: ClipboardList },
+    { name: "Hospitals", href: "/hospitals", icon: Hospital },
+    {
+      name: "Book Appointment",
+      href: "/dashboard/book-appointment",
+      icon: Calendar,
+    },
+    {
+      name: "My Appointments",
+      href: "/dashboard/appointments",
+      icon: ClipboardList,
+    },
     { name: "Medications", href: "/dashboard/medications", icon: Pill },
-    { name: "Drug Interaction", href: "/dashboard/drug-interaction", icon: AlertTriangle },
+    {
+      name: "Drug Interaction",
+      href: "/dashboard/drug-interaction",
+      icon: AlertTriangle,
+    },
     { name: "MedAI Bot", href: "/dashboard/medai-bot", icon: MessageSquare },
     { name: "Profile", href: "/dashboard/profile", icon: User },
-  ]
+  ];
 
   const NavItems = () => (
     <>
       {navigationItems.map((item) => {
-        const isActive = pathname === item.href
-        const Icon = item.icon
+        const isActive = pathname === item.href;
+        const Icon = item.icon;
 
         return (
           <Link
@@ -90,10 +106,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Icon className="h-5 w-5" />
             {item.name}
           </Link>
-        )
+        );
       })}
     </>
-  )
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -103,7 +119,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {isMobile && (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 md:hidden"
+                >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
@@ -117,7 +137,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <NavItems />
                 </nav>
                 <div className="border-t pt-4">
-                  <Button variant="ghost" className="w-full justify-start text-muted-foreground" onClick={handleLogout}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-muted-foreground"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="mr-3 h-5 w-5" />
                     Log out
                   </Button>
@@ -125,7 +149,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </SheetContent>
             </Sheet>
           )}
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 font-bold text-xl"
+          >
             <Heart className="h-6 w-6 text-rose-500" />
             <span>UPCHAAR</span>
           </Link>
@@ -135,7 +162,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex md:flex-col md:items-end md:gap-0.5">
                 <div className="text-sm font-medium">{user.name}</div>
-                <div className="text-xs text-muted-foreground">{user.email}</div>
+                <div className="text-xs text-muted-foreground">
+                  {user.email}
+                </div>
               </div>
               <Avatar>
                 <AvatarImage src="" alt={user.name} />
@@ -156,7 +185,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <NavItems />
               </nav>
               <div className="mt-auto">
-                <Button variant="ghost" className="w-full justify-start text-muted-foreground" onClick={handleLogout}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-muted-foreground"
+                  onClick={handleLogout}
+                >
                   <LogOut className="mr-3 h-5 w-5" />
                   Log out
                 </Button>
@@ -169,6 +202,5 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
-  )
+  );
 }
-
