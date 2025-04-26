@@ -387,7 +387,16 @@ export default {
     try {
       const hospitals = await prisma.hospital.findMany({
         include: {
-          departments: true,
+          departments: {
+            include: {
+              headDoctor: true,
+              doctors: {
+                include: {
+                  doctorSchedule: true,
+                },    
+              },
+            },
+          },
           beds: {
             include: {
               icu: true,

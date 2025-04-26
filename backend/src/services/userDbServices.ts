@@ -91,7 +91,7 @@ export default {
   createAppointment: (
     input: AppointmentInput,
     patientId: string,
-    date: string
+    date: Date
   ) => {
     const { hospitalId, departmentId, doctorId, title, time } = input;
     return prisma.appointment.create({
@@ -196,7 +196,7 @@ export default {
     });
   },
 
-  isTimeSlotTaken: (doctorId: string, date: string) => {
+  isTimeSlotTaken: (doctorId: string, date: Date) => {
     return prisma.appointment.findFirst({
       where: {
         doctorId,

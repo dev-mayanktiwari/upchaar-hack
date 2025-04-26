@@ -3,6 +3,7 @@ import { AppConfig } from "../config";
 import jwt from "jsonwebtoken";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { drugInteractionPrompt } from "../prompts";
@@ -11,6 +12,7 @@ dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default {
   getSystemHealth: () => {
@@ -49,8 +51,18 @@ export default {
     return token;
   },
 
-  combineDateTimeUTC: (date: string, time: string): string => {
-    return dayjs.utc(`${date} ${time}`).toISOString(); // Converts to ISO 8601 (UTC)
+  combineDateTimeUTC: (date: string, time: string): Date => {
+    const datetime = dayjs.tz(
+      `${date} ${time}`,
+      "YYYY-MM-DD HH:mm",
+      "Asia/Kolkata"
+    );
+
+    if (!datetime.isValid()) {
+      throw new Error("Invalid time value");
+    }
+
+    return datetime.utc().toDate();
   },
 
   parsedDate: (date: string) => {
@@ -79,23 +91,18 @@ export default {
     appointments: any[],
     leaveDates: any[]
   ) => {
-    // console.log("Doctor Schedule from fn:", doctorSchedule);
-    // console.log("Appointments from fn:", appointments);
     const result = [];
-    let current = dayjs(startDate);
-    const end = dayjs(endDate);
-
-    // console.log("Start Date:", startDate);
-    // console.log("End Date:", endDate);
+    let current = dayjs.tz(startDate, "Asia/Kolkata");
+    const end = dayjs.tz(endDate, "Asia/Kolkata");
 
     while (current.isBefore(end, "day")) {
       const dateStr = current.format("YYYY-MM-DD");
       const dayOfWeek = current.day();
 
       const isOnLeave = leaveDates.some((ld) =>
-        dayjs(ld.leaveDate).isSame(current, "day")
+        dayjs.tz(ld.leaveDate, "Asia/Kolkata").isSame(current, "day")
       );
-      console.log("Is on leave:", isOnLeave);
+
       if (isOnLeave) {
         result.push({ date: dateStr, isAvailable: false, slots: [] });
         current = current.add(1, "day");
@@ -103,7 +110,7 @@ export default {
       }
 
       const schedule = doctorSchedule.find((s) => s.day === dayOfWeek);
-      // console.log("Schedule for the day:", schedule);
+
       if (!schedule) {
         result.push({ date: dateStr, isAvailable: false, slots: [] });
         current = current.add(1, "day");
@@ -111,31 +118,32 @@ export default {
       }
 
       const slots = [];
-      let slotTime = dayjs(schedule.startTime);
-      const endTime = dayjs(schedule.endTime);
-      // console.log("Slot Time:", slotTime);
-      // console.log("End Time:", endTime);
-      while (slotTime.add(20, "minute").isSameOrBefore(endTime)) {
+
+      // 🕒 Convert full datetime strings to IST
+      let slotTime = dayjs.tz(schedule.startTime, "Asia/Kolkata");
+      const endTime = dayjs.tz(schedule.endTime, "Asia/Kolkata");
+
+      while (slotTime.isBefore(endTime)) {
         const slotStr = slotTime.format("HH:mm");
-        const fullDateTime = slotTime.toISOString();
 
         const isBooked = appointments.some((app) =>
-          dayjs(app.time).isSame(slotTime, "minute")
+          dayjs.tz(app.time, "Asia/Kolkata").isSame(slotTime, "minute")
         );
 
         slots.push({
-          time: slotStr,
+          time: slotStr, // this is in IST now
           isAvailable: !isBooked,
         });
 
         slotTime = slotTime.add(20, "minute");
       }
-      // console.log("Available slots for the day:", slots);
+
       result.push({
         date: dateStr,
         isAvailable: true,
         slots,
       });
+
       current = current.add(1, "day");
     }
 

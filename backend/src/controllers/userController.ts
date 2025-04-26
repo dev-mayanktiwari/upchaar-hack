@@ -223,19 +223,22 @@ export default {
 
       const parsedDate = quicker.parsedDate(safeParse.data.date);
 
-      const isOnLeave = doctorDbServices.isOnLeave(
-        safeParse.data.doctorId,
-        parsedDate
-      );
+      // REWRITE THIS CHECK MORE BETTER TILL THEN WE ARE USING THE SCHEDULE
+      // SO DON'T THINK THERE WILL BE ANY PROBLEM
 
-      if (!!isOnLeave) {
-        return httpError(
-          next,
-          "Doctor is on leave",
-          req,
-          EErrorStatusCode.BAD_REQUEST
-        );
-      }
+      // const isOnLeave = doctorDbServices.isOnLeave(
+      //   safeParse.data.doctorId,
+      //   parsedDate
+      // );
+
+      // if (!!isOnLeave) {
+      //   return httpError(
+      //     next,
+      //     new Error("Doctor is on leave"),
+      //     req,
+      //     EErrorStatusCode.BAD_REQUEST
+      //   );
+      // }
 
       const { doctorId, time, date } = safeParse.data;
 
