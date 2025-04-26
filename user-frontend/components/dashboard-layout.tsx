@@ -84,7 +84,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: AlertTriangle,
     },
     { name: "MedAI Bot", href: "/dashboard/medai-bot", icon: MessageSquare },
-    { name: "Profile", href: "/dashboard/profile", icon: User },
+    // { name: "Profile", href: "/dashboard/profile", icon: User },
   ];
 
   const NavItems = () => (
