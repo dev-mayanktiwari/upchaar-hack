@@ -12,7 +12,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return httpError(
       next,
-      "Unauthorized: No token provided",
+      new Error("Unauthorized: No token provided"),
       req,
       EErrorStatusCode.UNAUTHORIZED
     );
@@ -27,7 +27,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     if (!secretKey) {
       return httpError(
         next,
-        "Server error: Missing JWT secret",
+        new Error("Server error: Missing JWT secret"),
         req,
         EErrorStatusCode.INTERNAL_SERVER_ERROR
       );
@@ -38,7 +38,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     if (!decoded?.id) {
       return httpError(
         next,
-        "Invalid token: Missing user ID",
+        new Error("Invalid token: Missing user ID"),
         req,
         EErrorStatusCode.UNAUTHORIZED
       );
@@ -49,7 +49,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     return httpError(
       next,
-      "Token verification failed",
+      new Error("Token verification failed"),
       req,
       EErrorStatusCode.UNAUTHORIZED
     );

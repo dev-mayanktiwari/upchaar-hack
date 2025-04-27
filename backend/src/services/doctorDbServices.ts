@@ -1,3 +1,4 @@
+import { TApproveAppointmentType } from "../types/doctorSchema";
 import prisma from "../utils/getPrismaClient";
 
 export default {
@@ -11,11 +12,38 @@ export default {
     });
   },
 
+  getUpcomingLeaves: (doctorId: string) => {
+    return prisma.doctorLeave.count({
+      where: {
+        doctorId,
+        leaveDate: {
+          gte: new Date(),
+        },
+      },
+    });
+  },
+
   isOnLeave: (doctorId: string, date: Date) => {
     return prisma.doctorLeave.findFirst({
       where: {
         doctorId,
         leaveDate: date,
+      },
+    });
+  },
+
+  updateAppointmentStatus: (
+    appointmentId: number,
+    status: any,
+    doctorId: string
+  ) => {
+    return prisma.appointment.update({
+      where: {
+        id: appointmentId,
+        doctorId,
+      },
+      data: {
+        status,
       },
     });
   },
@@ -41,6 +69,21 @@ export default {
     });
   },
 
+  getPatientsCount: (doctorId: string) => {
+    return prisma.doctor.findUnique({
+      where: {
+        id: doctorId,
+      },
+      select: {
+        _count: {
+          select: {
+            patients: true,
+          },
+        },
+      },
+    });
+  },
+
   getDoctorSchedule: (doctorId: string, startDate: Date, endDate: Date) => {
     return prisma.doctorSchedule.findMany({
       where: {
@@ -49,7 +92,11 @@ export default {
     });
   },
 
-  getDoctorAppointments: (doctorId: string, startDate: Date, endDate: Date) => {
+  getDoctorAppointments: (
+    doctorId: string,
+    startDate?: Date,
+    endDate?: Date
+  ) => {
     return prisma.appointment.findMany({
       where: {
         doctorId,
@@ -76,13 +123,32 @@ export default {
     });
   },
 
+  getAllAppointments: (doctorId: string) => {
+    return prisma.appointment.findMany({
+      where: {
+        doctorId,
+      },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            contact: true,
+          },
+        },
+        hospital: true,
+      },
+    });
+  },
+
   getLeaveDates: (doctorId: string, startDate: Date, endDate: Date) => {
     const start = new Date(startDate);
     start.setUTCHours(0, 0, 0, 0);
-  
+
     const end = new Date(endDate);
     end.setUTCHours(23, 59, 59, 999);
-  
+
     return prisma.doctorLeave.findMany({
       where: {
         doctorId,
@@ -92,5 +158,5 @@ export default {
         },
       },
     });
-  }
+  },
 };

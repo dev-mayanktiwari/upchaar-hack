@@ -325,7 +325,7 @@ export default {
 
   self: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = (req as AuthenticatedRequest).id;
+      const userId = (req as AuthenticatedRequest).id || req.params.userId;
       const user = await userDbServices.getUserById(userId);
       if (!user) {
         return httpError(

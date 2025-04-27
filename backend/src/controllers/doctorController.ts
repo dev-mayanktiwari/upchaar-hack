@@ -7,6 +7,7 @@ import doctorDbServices from "../services/doctorDbServices";
 import quicker from "../utils/quicker";
 import { loginUserSchema } from "../types/userInputTypes";
 import bcrypt from "bcrypt";
+import { ApproveAppointmentSchema } from "../types/doctorSchema";
 
 export default {
   self: (req: Request, res: Response, next: NextFunction) => {
@@ -236,6 +237,167 @@ export default {
         EResponseStatusCode.OK,
         "Weekly schedule fetched successfully",
         weeklySchedule
+      );
+    } catch (error) {
+      httpError(next, error, req);
+    }
+  },
+
+  getAppointments: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const doctorId = req.params.doctorId || (req as AuthenticatedRequest).id;
+
+      if (!doctorId) {
+        return httpError(
+          next,
+          new Error("Doctor ID is required"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+
+      const appointments = await doctorDbServices.getAllAppointments(doctorId);
+
+      const approvedAppointmentCount = appointments.map(
+        (appointment) => appointment.status === "CONFIRMED"
+      ).length;
+
+      const pendingAppointmentCount = appointments.map(
+        (appointment) => appointment.status === "PENDING"
+      ).length;
+
+      return httpResponse(
+        req,
+        res,
+        EResponseStatusCode.OK,
+        "Appointments fetched successfully",
+        {
+          approved: approvedAppointmentCount,
+          pending: pendingAppointmentCount,
+          appointments: appointments,
+        }
+      );
+    } catch (error) {
+      httpError(next, error, req);
+    }
+  },
+
+  getPatients: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const doctorId = req.params.doctorId || (req as AuthenticatedRequest).id;
+
+      if (!doctorId) {
+        return httpError(
+          next,
+          new Error("Doctor ID is required"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+
+      const patientCount = await doctorDbServices.getPatientsCount(doctorId);
+
+      return httpResponse(
+        req,
+        res,
+        EResponseStatusCode.OK,
+        "Appointments fetched successfully",
+        {
+          patients: patientCount?._count.patients || 0,
+        }
+      );
+    } catch (error) {
+      httpError(next, error, req);
+    }
+  },
+
+  handleAppointment: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const doctorId = req.params.doctorId || (req as AuthenticatedRequest).id;
+
+      if (!doctorId) {
+        return httpError(
+          next,
+          new Error("Doctor ID is required"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+
+      console.log("body", req.body);
+      const appointmentId = Number(req.params.appointmentId);
+
+      if (!appointmentId) {
+        return httpError(
+          next,
+          new Error("Appointment ID or status is missing"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+
+      const statusParse = ApproveAppointmentSchema.safeParse(req.body);
+
+      if (!statusParse.success) {
+        return httpError(
+          next,
+          new Error("Invalid status"),
+          req,
+          EErrorStatusCode.BAD_REQUEST,
+          {
+            error: statusParse.error.format(),
+          }
+        );
+      }
+      const status = statusParse?.data.status;
+
+      const updatedAppointment = await doctorDbServices.updateAppointmentStatus(
+        appointmentId,
+        statusParse.data.status,
+        doctorId
+      );
+
+      return httpResponse(
+        req,
+        res,
+        EResponseStatusCode.OK,
+        "Appointment status updated successfully",
+        updatedAppointment
+      );
+    } catch (error) {
+      httpError(next, error, req);
+    }
+  },
+
+  getUpcomingLeaves: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const doctorId = req.params.doctorId || (req as AuthenticatedRequest).id;
+
+      if (!doctorId) {
+        return httpError(
+          next,
+          new Error("Doctor ID is required"),
+          req,
+          EErrorStatusCode.BAD_REQUEST
+        );
+      }
+
+      const upcomingLeaves = await doctorDbServices.getUpcomingLeaves(doctorId);
+
+      return httpResponse(
+        req,
+        res,
+        EResponseStatusCode.OK,
+        "Upcoming leaves fetched successfully",
+        upcomingLeaves
       );
     } catch (error) {
       httpError(next, error, req);

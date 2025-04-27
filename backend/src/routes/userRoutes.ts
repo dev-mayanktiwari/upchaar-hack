@@ -22,7 +22,7 @@ userRouter.get(
   authMiddleware,
   userController.getAppointments
 );
-userRouter.get("/self", authMiddleware, userController.self);
+userRouter.get("/self/:userId", userController.self);
 userRouter.get("/get-presigned-url", userController.getPresignedUrl);
 userRouter.get(
   "/drug-interaction",

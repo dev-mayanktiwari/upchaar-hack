@@ -15,5 +15,25 @@ doctorRouter.get(
   doctorController.getDoctorDetails
 );
 doctorRouter.post("/login", doctorController.login);
+doctorRouter.get(
+  "/get-all-appointments",
+  authMiddleware,
+  doctorController.getAppointments
+);
+doctorRouter.post(
+  "/handle-appointment/:appointmentId",
+  authMiddleware,
+  doctorController.handleAppointment
+);
+doctorRouter.get(
+  "/get-patients-count",
+  authMiddleware,
+  doctorController.getPatients
+);
+doctorRouter.get(
+  "/get-upcoming-leaves",
+  authMiddleware,
+  doctorController.getUpcomingLeaves
+);
 
 export default doctorRouter;

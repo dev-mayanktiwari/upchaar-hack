@@ -27,8 +27,27 @@ model Patient {
   bloodGroup     String
   contact        String
   appointments   Appointment[]
+  medications    Medication[]
   medicalHistory MedicalHistory?
   doctors        Doctor[]        @relation("DoctorPatients")
+}
+
+model Medication {
+  id           Int     @id @default(autoincrement())
+  name         String
+  strength     String // e.g. "500mg", "10mg"
+  durationDays Int
+  remarks      String?
+
+  // Relations
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  prescribedBy String?
+  doctor       Doctor? @relation(fields: [prescribedBy], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MedicalHistory {
@@ -81,6 +100,7 @@ model Doctor {
   appointments      Appointment[]
   doctorSchedule    DoctorSchedule[]
   doctorLeaves      DoctorLeave[]
+  prescriptions     Medication[]
   patients          Patient[]        @relation("DoctorPatients")
   headedDepartments Department[]     @relation("DepartmentHead")
   // departments       Department[]     @relation("DepartmentDoctors")
@@ -171,6 +191,7 @@ model Premium {
 model MedicineInventory {
   id         Int      @id @default(autoincrement())
   name       String
+  strength   String   @default("500mg")
   quantity   Int
   threshold  Int
   expiryDate DateTime

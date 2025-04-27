@@ -10,7 +10,7 @@ export default (
   data: unknown,
   errorStatusCode: number = 500
 ): THTTPError => {
-  // console.log("Error", error);
+  console.log("Error", error);
   const errorObject: THTTPError = {
     success: false,
     statusCode: errorStatusCode,

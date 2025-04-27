@@ -19,7 +19,7 @@ const PORT = AppConfig.get("PORT") || 3000;
 app.use(express.json());
 app.use(
   cors({
-    origin: String(AppConfig.get("CORS_ORIGIN")),
+    origin: [String(AppConfig.get("CORS_ORIGIN")), "http://localhost:3001"],
     credentials: true,
   })
 );
@@ -86,4 +86,3 @@ process.on("SIGINT", async () => {
 // //       }
 // //     }
 // //   }
-
