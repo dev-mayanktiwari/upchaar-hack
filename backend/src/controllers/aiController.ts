@@ -160,7 +160,7 @@ export default {
       );
 
       const medicineInteractionResult = await medicineInteraction(
-        userMedicalData,
+        JSON.stringify(userMedicalData),
         medicineArray
       );
 

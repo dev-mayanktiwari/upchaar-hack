@@ -6,7 +6,7 @@ export const medicineInteraction = async (data: any, medicines: string[]) => {
   try {
     console.log("Medicines received for alternatives:", medicines);
     console.log("Data received for medicines:", data);
-    
+
     if (!medicines || !Array.isArray(medicines) || medicines.length === 0) {
       return {
         error: {
@@ -17,7 +17,7 @@ export const medicineInteraction = async (data: any, medicines: string[]) => {
         },
       };
     }
-
+    console.log("Hello from medicine interaction with Gemini", data);
     const response = await genAI.generateContent({
       contents: [
         {

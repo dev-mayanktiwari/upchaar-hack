@@ -15,6 +15,7 @@ export const drugInteractionWithGemini = async (data: any) => {
     }
 
     console.log("Data received for drug interaction:", data);
+    console.log("Hello from drug interaction with Gemini");
     // const properInput = JSON.parse(data);
 
     const response = await genAI.generateContent({

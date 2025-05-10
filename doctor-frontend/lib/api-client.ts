@@ -185,10 +185,10 @@ export const aiService = {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     }),
-  getMedicineInteraction: (data: any) =>
+  getMedicineInteraction: (userId: string, data: any) =>
     apiRequest({
       method: "POST",
-      url: `/ai/medicine-interaction-protected`,
+      url: `/ai/medicine-interaction/${userId}`,
       data: {
         medicineArray: data,
       },

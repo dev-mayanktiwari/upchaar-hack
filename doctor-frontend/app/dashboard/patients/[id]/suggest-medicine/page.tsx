@@ -527,7 +527,7 @@ export default function SuggestMedicinePage({
     try {
       // Call the API to check inventory
       const res = await aiService.getAlternativeMedicines(
-        medications.map(({ name, strength }) => ({ name, strength }))
+        medications.map(({ name }) => ({ name }))
       );
       console.log("Checking inventory for medications:", medications);
       console.log("Inventory check response:", res);
@@ -567,6 +567,7 @@ export default function SuggestMedicinePage({
     try {
       // Call the API to check drug interactions
       const res = await aiService.getMedicineInteraction(
+        patientId,
         medications.map(({ name }) => ({ name }))
       );
 
@@ -918,9 +919,7 @@ export default function SuggestMedicinePage({
                               <span>Not available in inventory</span>
                             </div>
                             {inventoryResults.alternatives.some(
-                              (alt) =>
-                                alt.original ===
-                                `${medication.name}`
+                              (alt) => alt.original === `${medication.name}`
                             ) && (
                               <div className="mt-1 ml-6">
                                 <span className="font-medium">
@@ -929,8 +928,7 @@ export default function SuggestMedicinePage({
                                 {inventoryResults.alternatives
                                   .filter(
                                     (alt) =>
-                                      alt.original ===
-                                      `${medication.name}`
+                                      alt.original === `${medication.name}`
                                   )
                                   .map((alt, index) => (
                                     <Button
@@ -975,7 +973,7 @@ export default function SuggestMedicinePage({
                   variant="outline"
                   className="flex-1"
                   onClick={checkDrugInteractions}
-                  disabled={medications.length < 2 || isCheckingInteractions}
+                  // disabled={medications.length < 2 || isCheckingInteractions}
                 >
                   {isCheckingInteractions ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -11,17 +11,11 @@ import {
 } from "../types/userInputTypes";
 import userDbServices from "../services/userDbServices";
 import quicker from "../utils/quicker";
-import redisClient from "../utils/redisClient";
 import AuthenticatedRequest from "../types/expressRequest";
 import { AppConfig } from "../config";
 import { cloudinary } from "../utils/cloudinaryConfig";
 import { extractMedicalData } from "../agents/ocrAgent";
 import logger from "../utils/logger";
-
-import { http } from "winston";
-import doctorDbServices from "../services/doctorDbServices";
-import { drugInteractionData } from "../constant";
-import model from "../agents/medLMSetup";
 import { drugInteractionWithGemini } from "../agents/drugInteraction";
 
 interface MedicationItem {
