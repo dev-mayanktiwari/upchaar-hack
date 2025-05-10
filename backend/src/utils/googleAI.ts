@@ -14,7 +14,7 @@ export const google = createGoogleGenerativeAI({
 
 const ai = new GoogleGenerativeAI(String(AppConfig.get("GEMINI_API_KEY")));
 export const genAI = ai.getGenerativeModel({
-  model: "gemini-2.5-pro-exp-03-25",
+  model: "gemini-2.0-flash",
 });
 
 // THIS CODE WAS FOR VERCEL AI SDK 

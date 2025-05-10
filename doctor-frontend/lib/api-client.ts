@@ -118,6 +118,7 @@ export const patientService = {
       url: `/user/self/${patientId}`,
     }),
 };
+
 export const medicationService = {
   getUploadUrl: (fileName: string, fileType: string) =>
     apiRequest({
@@ -181,8 +182,20 @@ export const aiService = {
       },
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     }),
-}
+  getMedicineInteraction: (data: any) =>
+    apiRequest({
+      method: "POST",
+      url: `/ai/medicine-interaction-protected`,
+      data: {
+        medicineArray: data,
+      },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    }),
+};
 export default apiClient;

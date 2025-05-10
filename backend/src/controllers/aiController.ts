@@ -98,9 +98,32 @@ export default {
     next: NextFunction
   ) => {
     try {
-      const userId = req.params.userId;
+      console.log("Request body:", req.body);
+      console.log("Request user:", (req as any).user); // Check if user exists in req
+      console.log("Auth header:", req.headers.authorization); // Check auth header
+
+      let userId;
+      if (req.params.userId) {
+        console.log("Using userId from params:", req.params.userId);
+        userId = req.params.userId;
+      } else if ((req as AuthenticatedRequest).id) {
+        console.log(
+          "Using userId from AuthenticatedRequest:",
+          (req as AuthenticatedRequest).id
+        );
+        userId = (req as AuthenticatedRequest).id;
+      } else {
+        return httpError(
+          next,
+          new Error("User ID not found in request"),
+          req,
+          EErrorStatusCode.UNAUTHORIZED
+        );
+      }
+      // const userId = req.params.userId || (req as AuthenticatedRequest).id;
       const medicineArray = req.body.medicineArray;
       const user = await userDbServices.getUserById(userId);
+      console.log("User data:", user);
 
       if (!user) {
         return httpError(
@@ -111,8 +134,12 @@ export default {
         );
       }
       // @ts-ignore
-      const reportDataJson = JSON.parse(user.medicalHistory?.reportData || []);
-      console.log("Report data", reportDataJson);
+      console.log("Medical report data:", user.medicalHistory?.reportData);
+      const reportDataJson = JSON.parse(
+        user.medicalHistory?.reportData[0] || ""
+      );
+
+      // console.log("Report data", reportDataJson);
       console.log("Report data JSON", reportDataJson);
       const userMedicalData = {
         age: user.age,
@@ -127,8 +154,13 @@ export default {
         reportData: reportDataJson,
       };
 
+      console.log(
+        "Input user medical data for medicine interaction",
+        userMedicalData
+      );
+
       const medicineInteractionResult = await medicineInteraction(
-        JSON.stringify(userMedicalData),
+        userMedicalData,
         medicineArray
       );
 

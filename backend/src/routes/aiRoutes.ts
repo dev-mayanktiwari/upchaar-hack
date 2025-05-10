@@ -14,5 +14,10 @@ aiRouter.post(
   "/medicine-interaction/:userId",
   aiController.medicineInteraction
 );
+aiRouter.post(
+  "/medicine-interaction-protected",
+  authMiddleware,
+  aiController.medicineInteraction
+);
 
 export default aiRouter;

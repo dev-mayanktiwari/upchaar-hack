@@ -32,13 +32,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -532,27 +525,23 @@ export default function SuggestMedicinePage({
     setIsCheckingInventory(true);
 
     try {
-      // Simulate API call to check inventory
-      // In a real implementation, this would be an actual API call
+      // Call the API to check inventory
       const res = await aiService.getAlternativeMedicines(
         medications.map(({ name, strength }) => ({ name, strength }))
       );
       console.log("Checking inventory for medications:", medications);
       console.log("Inventory check response:", res);
-      // await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Mock response for demonstration
-
+      // Extract the alternativeMedicines data from the response
       // @ts-ignore
-      const mockResponse = res.data.alternativeMedicines;
+      const alternativeMedicinesData = res.data.alternativeMedicines;
+      setInventoryResults(alternativeMedicinesData);
 
-      setInventoryResults(mockResponse);
-
-      if (mockResponse.missing.length > 0) {
+      if (alternativeMedicinesData.missing.length > 0) {
         toast({
           variant: "destructive",
           title: "Inventory Check",
-          description: `${mockResponse.missing.length} medication(s) not available in inventory.`,
+          description: `${alternativeMedicinesData.missing.length} medication(s) not available in inventory.`,
         });
       } else {
         toast({
@@ -573,36 +562,39 @@ export default function SuggestMedicinePage({
   };
 
   const checkDrugInteractions = async () => {
-    if (medications.length < 2) {
-      toast({
-        variant: "destructive",
-        title: "Not Enough Medications",
-        description:
-          "At least two medications are required to check for interactions.",
-      });
-      return;
-    }
-
     setIsCheckingInteractions(true);
 
     try {
-      // Simulate API call to check drug interactions
-      // In a real implementation, this would be an actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call the API to check drug interactions
+      const res = await aiService.getMedicineInteraction(
+        medications.map(({ name }) => ({ name }))
+      );
 
-      // Mock response for demonstration
-      const mockInteractions: DrugInteraction[] = [
-        {
-          drug1: medications[0].name,
-          drug2: medications.length > 1 ? medications[1].name : "Unknown",
-          severity: "moderate",
+      console.log("Interaction check response:", res);
+
+      // Process the API response
+      // @ts-ignore
+      const interactionData = res.data.result;
+
+      if (interactionData.interaction) {
+        // Create a formatted interaction result
+        const formattedInteraction = {
+          drug1: medications[0]?.name || "Medication",
+          drug2:
+            medications.length > 1 ? medications[1].name : "Patient condition",
+          severity: "severe",
           description:
-            "These medications may interact to increase the risk of side effects. Monitor patient closely.",
-        },
-      ];
-
-      setInteractionResults(mockInteractions);
-      setShowInteractionDialog(true);
+            interactionData.reason + " " + interactionData.suggestion,
+        };
+        // @ts-ignore
+        setInteractionResults([formattedInteraction]);
+        setShowInteractionDialog(true);
+      } else {
+        toast({
+          title: "No Interactions Found",
+          description: "No significant drug interactions were detected.",
+        });
+      }
     } catch (error) {
       console.error("Error checking drug interactions:", error);
       toast({
@@ -816,6 +808,77 @@ export default function SuggestMedicinePage({
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* {medications.map((medication) => (
+                    <div
+                      key={medication.id}
+                      className="flex flex-col rounded-lg border p-4"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-medium">{medication.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {medication.strength} • {medication.duration} days
+                          </p>
+                          {medication.remarks && (
+                            <p className="mt-2 text-sm">
+                              <span className="font-medium">Remarks:</span>{" "}
+                              {medication.remarks}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeMedication(medication.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Remove</span>
+                        </Button>
+                      </div>
+
+                      {inventoryResults?.missing.includes(
+                        `${medication.name} - strength: ${medication.strength}`
+                      ) && (
+                        <div className="mt-2 rounded-md bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                          <div className="flex items-center">
+                            <AlertTriangle className="mr-2 h-4 w-4" />
+                            <span>Not available in inventory</span>
+                          </div>
+                          {inventoryResults.alternatives.some(
+                            (alt) =>
+                              alt.original ===
+                              `${medication.name} - strength: ${medication.strength}`
+                          ) && (
+                            <div className="mt-1 ml-6">
+                              <span className="font-medium">Alternative: </span>
+                              {inventoryResults.alternatives
+                                .filter(
+                                  (alt) =>
+                                    alt.original ===
+                                    `${medication.name} - strength: ${medication.strength}`
+                                )
+                                .map((alt, index) => (
+                                  <Button
+                                    key={index}
+                                    variant="link"
+                                    className="p-0 h-auto text-amber-800 dark:text-amber-200 underline"
+                                    onClick={() =>
+                                      replaceMedication(
+                                        medication.id,
+                                        alt.alternative
+                                      )
+                                    }
+                                  >
+                                    {alt.alternative}
+                                  </Button>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))} */}
                   {medications.map((medication) => (
                     <div
                       key={medication.id}
@@ -845,40 +908,49 @@ export default function SuggestMedicinePage({
                         </Button>
                       </div>
 
-                      {inventoryResults?.missing.includes(medication.name) && (
-                        <div className="mt-2 rounded-md bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-                          <div className="flex items-center">
-                            <AlertTriangle className="mr-2 h-4 w-4" />
-                            <span>Not available in inventory</span>
-                          </div>
-                          {inventoryResults.alternatives.some(
-                            (alt) => alt.original === medication.name
-                          ) && (
-                            <div className="mt-1 ml-6">
-                              <span className="font-medium">Alternative: </span>
-                              {inventoryResults.alternatives
-                                .filter(
-                                  (alt) => alt.original === medication.name
-                                )
-                                .map((alt, index) => (
-                                  <Button
-                                    key={index}
-                                    variant="link"
-                                    className="p-0 h-auto text-amber-800 dark:text-amber-200 underline"
-                                    onClick={() =>
-                                      replaceMedication(
-                                        medication.id,
-                                        alt.alternative
-                                      )
-                                    }
-                                  >
-                                    {alt.alternative}
-                                  </Button>
-                                ))}
+                      {inventoryResults &&
+                        inventoryResults.missing.includes(
+                          `${medication.name}`
+                        ) && (
+                          <div className="mt-2 rounded-md bg-amber-50 p-2 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                            <div className="flex items-center">
+                              <AlertTriangle className="mr-2 h-4 w-4" />
+                              <span>Not available in inventory</span>
                             </div>
-                          )}
-                        </div>
-                      )}
+                            {inventoryResults.alternatives.some(
+                              (alt) =>
+                                alt.original ===
+                                `${medication.name}`
+                            ) && (
+                              <div className="mt-1 ml-6">
+                                <span className="font-medium">
+                                  Alternative:{" "}
+                                </span>
+                                {inventoryResults.alternatives
+                                  .filter(
+                                    (alt) =>
+                                      alt.original ===
+                                      `${medication.name}`
+                                  )
+                                  .map((alt, index) => (
+                                    <Button
+                                      key={index}
+                                      variant="link"
+                                      className="p-0 h-auto text-amber-800 dark:text-amber-200 underline"
+                                      onClick={() =>
+                                        replaceMedication(
+                                          medication.id,
+                                          alt.alternative
+                                        )
+                                      }
+                                    >
+                                      {alt.alternative}
+                                    </Button>
+                                  ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                     </div>
                   ))}
                 </div>

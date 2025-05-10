@@ -5,6 +5,8 @@ import logger from "../utils/logger";
 export const medicineInteraction = async (data: any, medicines: string[]) => {
   try {
     console.log("Medicines received for alternatives:", medicines);
+    console.log("Data received for medicines:", data);
+    
     if (!medicines || !Array.isArray(medicines) || medicines.length === 0) {
       return {
         error: {
